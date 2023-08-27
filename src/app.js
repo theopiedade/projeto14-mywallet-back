@@ -7,8 +7,8 @@ import bcrypt from 'bcrypt';
 
 
 const app = express();
+app.use(express.json());
 app.use(cors());
-app.use(express.json())
 dotenv.config();
 
 // DB Connection init
@@ -25,25 +25,13 @@ const db = mongoClient.db();
 // DB Connection end
 
 // JOI Schemas init
-const nameSchema = joi.object({
-    name: joi.string().required()
-});
+const schema = joi.object({
+    name: joi.string().required(),
 
-const emailSchema = joi.object({
-    
-});
-
-const passwordSchema = joi.object({
-    password: joi.string().required().min(3)
-});
-
-const schema = Joi.object({
-    name: Joi.string().required(),
-
-    email: Joi.string().required()
+    email: joi.string().required()
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
 
-    password: Joi.string().required().min(3)
+    password: joi.string().required().min(3)
 })
 
 // JOI Schemas end
@@ -61,10 +49,8 @@ app.post("/signup", async (req, res) => {
     const user = {
         name: name,
         email: email,
-        password: bcrypt.hashSync(senha, 10)
+        password: bcrypt.hashSync(password, 10)
     }
-
-    console.log(msg);
 
    try {
        await db.collection('users').insertOne(user);
@@ -78,5 +64,15 @@ app.post("/signup", async (req, res) => {
    }
  
 });
+
+app.get('/users', async (req, res) => {
+    try {
+      const users = await db.collection('users').find().toArray();
+      res.send(users);
+    } catch (error) {
+      console.error(error);
+      res.sendStatus(500);
+    }
+  });
 
 app.listen(5000);
