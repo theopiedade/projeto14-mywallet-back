@@ -54,11 +54,9 @@ app.post("/signup", async (req, res) => {
 
    try {
        await db.collection('users').insertOne(user);
-
-       res.sendStatus(201);
-       res.send('Created');
-       res.send(user);
-    } catch (err) {
+       return res.sendStatus(201);
+    } 
+    catch (err) {
        console.log(err);
        res.sendStatus(500);
    }
