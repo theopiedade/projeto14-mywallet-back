@@ -103,9 +103,10 @@ app.get('/users', async (req, res) => {
 
   app.get('/user', async (req, res) => {
     const {email} = req.body;
-    const user = await db.collection('users').findOne({ email });
+  
     try {
-      res.send(user.name);
+      const user = await db.collection('users').name.findOne({ email });
+      res.send(user);
     } catch (error) {
       console.error(error);
       res.sendStatus(500);
