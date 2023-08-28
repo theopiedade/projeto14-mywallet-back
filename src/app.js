@@ -34,6 +34,13 @@ const schema = joi.object({
     password: joi.string().required().min(3)
 })
 
+const signinSchema= joi.object({
+    email: joi.string().required()
+        .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
+
+    password: joi.string().required().min(3)
+})
+
 // JOI Schemas end
 
 
@@ -63,6 +70,31 @@ app.post("/signup", async (req, res) => {
  
 });
 
+app.post("/signin", async (req, res) => {
+    const {email, password} = req.body;
+
+    const validateSchema = signinSchema.validate(req.body, { abortEarly: false })
+    if (validateSchema.error) return res.sendStatus(422);
+
+    const user = await db.collection('users').findOne({ email });
+    if(user && bcrypt.compareSync(password, user.password)) {
+        const userData = {
+            email: email,
+            password: bcrypt.hashSync(password, 10)
+        }
+    
+       try {
+           return res.sendStatus(200);
+        } 
+        catch (err) {
+           console.log(err);
+           res.sendStatus(500);
+       }
+    } 
+    else return res.sendStatus(404);
+
+});
+
 app.get('/users', async (req, res) => {
     try {
       const users = await db.collection('users').find().toArray();
@@ -72,5 +104,7 @@ app.get('/users', async (req, res) => {
       res.sendStatus(500);
     }
   });
+
+
 
 app.listen(5000);
