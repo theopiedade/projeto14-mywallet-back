@@ -78,11 +78,7 @@ app.post("/signin", async (req, res) => {
 
     const user = await db.collection('users').findOne({ email });
     if(user && bcrypt.compareSync(password, user.password)) {
-        const userData = {
-            email: email,
-            password: bcrypt.hashSync(password, 10)
-        }
-    
+
        try {
            return res.sendStatus(200);
         } 
@@ -99,6 +95,17 @@ app.get('/users', async (req, res) => {
     try {
       const users = await db.collection('users').find().toArray();
       res.send(users);
+    } catch (error) {
+      console.error(error);
+      res.sendStatus(500);
+    }
+  });
+
+  app.get('/user', async (req, res) => {
+    const {email} = req.body;
+    const user = await db.collection('users').findOne({ email });
+    try {
+      res.send(user.name);
     } catch (error) {
       console.error(error);
       res.sendStatus(500);
